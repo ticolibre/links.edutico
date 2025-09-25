@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Schedule - IDIER05GR1</title>
+    <link rel="icon" href="files/flag.png" type="image/png"> <!-- Link to Favicon -->
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #f3f4f6;
+            --accent-color: #6366f1;
+            --text-color: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f9fafb;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header .contact-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            text-decoration: none;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+
+        .header .contact-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .course-info {
+            background-color: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .course-info p {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .course-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .course-info strong {
+            color: var(--primary-color);
+            min-width: 100px;
+        }
+
+        .schedule {
+            background-color: white;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .week-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .week-item:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .week-content strong {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .week-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .task-tag {
+            background-color: #e0e7ff;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .assessment-item {
+            padding: 2rem;
+            border-bottom: 1px solid var(--secondary-color);
+        }
+
+        .assessment-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .assessment-item p {
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+
+        ul {
+    list-style-type: none;  /* Removes the default bullet points */
+    padding: 0;  /* Removes padding */
+    margin: 20px 0;  /* Adds space above and below the list */
+}
+
+ul li {
+    margin-bottom: 15px;  /* Adds space between each list item */
+    font-size: 16px;  /* Sets the font size */
+}
+
+ul li a {
+    color: var(--primary-color);  /* Keeps the link color as per your original design */
+    text-decoration: none;  /* Removes the underline */
+    
+}
+
+ul li a:hover {
+    color: #0073e6;  /* Changes color when hovering over the link */
+    text-decoration: underline;  /* Adds underline on hover */
+}
+
+
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .week-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .task-tag {
+                margin-top: 1rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="title">English Course Chronogram</div>
+            <a href="https://www.linkedin.com/in/ticolibre" class="contact-btn">LinkedIn Profile ⚡</a>
+        </header>
+
+        <div class="course-info">
+            <p><strong>Professor</strong> Jose Manuel Campos N</p>
+            <p><strong>Room</strong> 807</p>
+            <p><strong>Campus</strong> Cañas</p>
+            <p><strong>Schedule</strong> Fridays 8:00 AM - 12:00 PM</p>
+            <p><strong>Email</strong> jcamposn@utn.ac.cr</p>
+            <p><strong>Website</strong> <a href="https://englishpost.org" style="color: var(--primary-color);">EnglishPost.org</a></p>
+            <p><strong>Syllabus</strong> <a href="https://links.edutico.com/assets/idier05" style="color: var(--primary-color);">IDIER05</a></p>
+        </div>
+
+        <section class="schedule">
+            <div class="section-header">
+                <h2>Course Schedule</h2>
+            </div>
+            
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 01:</strong> Unconducted Lesson
+                    <div class="week-date">2025-09-19</div>
+                </div>
+            </div>
+
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 02:</strong> How to Agree or Disagree with Work-Related Matters
+                    <div class="week-date">2025-09-26</div>
+                </div>
+            </div>
+
+            <div class="week-item">
+                <div class="week-content"> 
+                    <strong>Week 03:</strong> How to Offer Advice on Work-Related Matters
+                    <div class="week-date">2025-10-03</div>
+                </div>
+               <span class="task-tag">Writing Task #1 - (2.5%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">  
+                    <strong>Week 04:</strong>  How to Take Notes
+                    <div class="week-date">2025-10-10</div>
+                </div>
+                <span class="task-tag">Writing Task #2 - (2.5%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 05:</strong> How to Make Complaints about Products
+                    <div class="week-date">2025-10-17</div>
+                </div>
+                <span class="task-tag"> Short Test #1 - (10%)</span>
+                
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 06:</strong>How to Describe your Professional Dreams and Hopes 
+                    <div class="week-date">2025-10-24</div>
+                </div>
+                <span class="task-tag">Oral Task #1 - (5%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 07:</strong> Midterm Interview
+                    <div class="week-date">2025-10-31</div>
+                </div>
+                <span class="task-tag">Interview #1 - (20%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 08:</strong>  How to Undertand Personal and Professional Correspondence
+                    <div class="week-date">2025-11-07</div>
+                </div>
+               <span class="task-tag">Writing Task #3 - (2.5%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 09:</strong> How to Express Opinions on Professional-Related Matters
+                    <div class="week-date">2025-11-14</div>
+                </div>
+                <span class="task-tag"> Short Test #2 - (10%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 10:</strong> How to Understand Short Talks on Familiar Topics
+                    <div class="week-date">2025-11-21</div>
+                </div>
+                 <span class="task-tag">Oral Task #2 - (5%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 11:</strong>  How to Ask How Things Work
+                    <div class="week-date">2025-11-28</div>
+                </div>
+                 <span class="task-tag">Writing Task #4 - (2.5%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 12:</strong> How to Compose Business Emails
+                    <div class="week-date">2025-12-05</div>
+                </div>
+                <span class="task-tag"> Short Test #3 - (10%)</span>
+            </div>
+            <div class="week-item">
+                <div class="week-content">
+                    <strong>Week 13:</strong> Final Interview
+                    <div class="week-date">2025-12-12</div>
+                </div>
+                <span class="task-tag"> Final Interview - (20%)</span>
+            </div>
+        </section>
+
+        <section class="schedule">
+            <div class="section-header">
+                <h2>Assessment Structure</h2>
+            </div>
+            <div class="assessment-item">
+                <h3>In-Class Assessment (90%)</h3>
+                <p>Oral Tasks, Writing Tasks, and Tests and Interviews will take place during lessons on the specified dates. Scores will be handed in or reported on the Virtual Campus and Avatar eight days after they were taken.</p>
+            </div>
+            <div class="assessment-item">
+                <h3>Out-of-Class Assessment (10%)</h3>
+                <p><strong>Virtual Campus #1 (4%):</strong> Tasks tagged as "homework" from week #1 to week #6. You have at least 8 days to complete the tasks of each week. Scores will be added to the Avatar on Week #7.</p>
+                <p><strong>Virtual Campus #2 (4%):</strong> Tasks tagged as "homework" from week #8 to week #11. You have at least 8 days to complete the tasks of each week. Scores will be added to the Avatar on Week #13.</p>
+                <p><strong>Webinar (2%):</strong> Webinar Links will be shared once they are made available to me.</p>
+            </div>
+        </section>
+
+        <section class="schedule">
+            <div class="section-header">
+                <h2>Additional Information</h2>
+            </div>
+            <div class="assessment-item">
+                <h3>Other Important Dates</h3>
+                <p><strong>Quarter</strong>  Ends on December 14th</p>
+                <p><strong> Final Grades</strong> will be available on the Avatar sometime between December 14th and December 19th</p>
+                <p><strong> La prueba de sustitución</strong> will take place sometime in January</p>
+            </div>
+            <div class="assessment-item">
+                <h3>Considerations</h3>
+                <p><strong>#1:</strong> If you miss an evaluation, you are required to present a formal justification no later than 8 calendar days after the missed date. Please review articles 26 to 29 from the Reglamento de Evaluación del Proceso de Aprendizajes for detailed requirements</p>
+                <p><strong>#2:</strong> If you are absent from three classes, you risk failing the course. Attendance is crucial to your success and is monitored closely.</p>
+                <p><strong>#3</strong> Articles #30 to #37 of the Reglamento de Evaluación del Proceso de Aprendizaje outline the conditions under which you may be eligible to take the "Prueba de sustitución". Please review these articles for detailed requirements.</p>
+                <p><strong>#4</strong> Please be advised that, in the event of unforeseen circumstances, there may be adjustments to the established chronogram. Any such changes will be communicated promptly to all relevant parties.</p>
+            </div>
+            <div class="assessment-item">
+                <h3>Links</h3>
+                <p>These are some links that you definitely should check out </p>
+                <ul>
+                    <li><strong>For Homework and official Communication: </strong> <a href="https://campus.utn.ac.cr/login/index.php" style="color: var(--primary-color);">Virtual Campus</a></li>
+                    <li><strong>For Courses & Lessons: </strong> <a href="https://englishpost.org/cursos/" style="color: var(--primary-color);">EnglishPost.org</a></li>
+                    <li><strong>For Pronunciation and Phonetic Transcriptions: </strong> <a href="https://dictionary.cambridge.org/" style="color: var(--primary-color);">Diccionario de Cambridge</a></li>
+                    <li><strong>For Pronunciation Interactive Exercises: </strong> <a href="https://elsaspeak.com/en/" style="color: var(--primary-color);">Elsa Speak</a></li>
+                </ul>
+                
+            </div>
+        </section>
+    </div>
+</body>
+</html>
