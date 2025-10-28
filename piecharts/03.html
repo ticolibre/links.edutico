@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Usage Pie Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: #f4f6f8;
+        }
+        h1 {
+            color: #333;
+        }
+        #chart-container {
+            width: 70%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Favorite Programming Languages</h1>
+    <div id="chart-container">
+        <canvas id="browserChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('browserChart').getContext('2d');
+        const browserChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Python', 'Java', 'Node.js', 'PHP', 'Go', 'C#'],
+                datasets: [{
+                    label: 'Browser Usage',
+                    data: [30, 25, 20, 15, 6, 4],
+                    backgroundColor: [
+                        '#4285F4', // Chrome - blue
+                        '#FFB900', // Safari - yellow/orange
+                        '#00A1F1', // Edge - light blue
+                        '#FF7139', // Firefox - orange
+                        '#FF1B2D', // Opera - red
+                        '#8E8E8E'  // Others - gray
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value) => value + '%'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    </script>
+</body>
+</html>
