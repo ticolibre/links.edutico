@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Task Recorder 3.0</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  .container {
+    background: #ffffffcc;
+    backdrop-filter: blur(10px);
+    padding: 30px 40px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+
+  h1 { margin-bottom: 20px; font-size: 24px; color: #333; }
+  label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600; color: #444; }
+  input, select {
+    width: 90%; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;
+    transition: border 0.2s;
+  }
+  input:focus, select:focus { border-color: #007BFF; outline: none; }
+  button {
+    width: 100%; padding: 12px; margin-top: 15px; border-radius: 10px; border: none;
+    font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s, transform 0.2s;
+  }
+  button:hover:not(:disabled) { transform: translateY(-2px); }
+  #chooseTopicsBtn { background: #ff7e5f; color: #fff; }
+  #startRecordingBtn { background: #28a745; color: #fff; }
+  #nextTopicBtn { background: #007BFF; color: #fff; }
+  #stopRecordingBtn { background: #dc3545; color: #fff; }
+  button:disabled { background: #999; cursor: not-allowed; }
+  #topics { margin: 20px 0; font-weight: bold; color: #555; min-height: 24px; text-align: left; line-height: 1.6; }
+  #topics strong { color: #007BFF; }
+  #timer { margin-top: 15px; font-size: 18px; font-weight: bold; color: #007BFF; display: none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Audio Task Recorder</h1>
+
+  <label id="firstNameLabel">First Name</label>
+  <input type="text" id="firstName" placeholder="Enter first name">
+
+  <label id="lastNameLabel">Last Name</label>
+  <input type="text" id="lastName" placeholder="Enter last name">
+
+  <label id="taskLabel">Interview</label>
+  <select id="taskSelect">
+    <option value="Interview_1">Interview 1</option>
+    <option value="Interview_2">Interview 2</option>
+  </select>
+
+  <button id="chooseTopicsBtn">Choose Random Topics</button>
+  <div id="topics"></div>
+
+  <button id="startRecordingBtn" style="display:none;">Start Recording</button>
+  <button id="nextTopicBtn" style="display:none;">Next Section</button>
+  <button id="stopRecordingBtn" style="display:none;">Stop Recording</button>
+  <div id="timer">Time Remaining: 02:00</div>
+</div>
+
+<script>
+// Generic topics
+const topic1 = ["Types of Energy", "Energy Engineering Classes"];
+const topic2 = ["Professional Development", "Career Achievements", "Financial Dreams", "Lifestyle Dreams"];
+const topic3 = ["Education & Study choices", "Health & Fitness choices", "Technology & Apps choices", "Career choices", "Entertainment choices"];
+
+let mediaRecorder, audioChunks = [], countdownInterval;
+let topics = [], currentTopicIndex = 0, topicTimeLeft = 120;
+
+const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const taskSelect = document.getElementById('taskSelect');
+const chooseTopicsBtn = document.getElementById('chooseTopicsBtn');
+const startRecordingBtn = document.getElementById('startRecordingBtn');
+const nextTopicBtn = document.getElementById('nextTopicBtn');
+const stopRecordingBtn = document.getElementById('stopRecordingBtn');
+const topicsDiv = document.getElementById('topics');
+const timerDiv = document.getElementById('timer');
+
+function formatTime(seconds){
+  const m = Math.floor(seconds/60).toString().padStart(2,'0');
+  const s = (seconds%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+// Disable all main buttons for 5 seconds
+function disableAllButtonsTemporarily(){
+  [startRecordingBtn, nextTopicBtn, stopRecordingBtn].forEach(btn => btn.disabled = true);
+  setTimeout(() => {
+    [startRecordingBtn, nextTopicBtn, stopRecordingBtn].forEach(btn => btn.disabled = false);
+  }, 5000);
+}
+
+// Choose random topics
+chooseTopicsBtn.addEventListener('click', () => {
+  const firstName = firstNameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  if(!firstName || !lastName){
+    alert("Please enter both your first and last name!");
+    return;
+  }
+
+  const choice1 = topic1[Math.floor(Math.random() * topic1.length)];
+  const choice2 = topic2[Math.floor(Math.random() * topic2.length)];
+  const choice3 = topic3[Math.floor(Math.random() * topic3.length)];
+
+  topics = [
+    { name: "Section 1", choice: choice1, instruction: `1️⃣ Give your opinions about ${choice1}.` },
+    { name: "Section 2", choice: choice2, instruction: `2️⃣ Share your future plans related to ${choice2}.` },
+    { name: "Section 3", choice: choice3, instruction: `3️⃣ Give your recommendations related to ${choice3}.` }
+  ];
+
+  // Hide form elements
+  firstNameInput.style.display = 'none';
+  lastNameInput.style.display = 'none';
+  taskSelect.style.display = 'none';
+  document.getElementById('firstNameLabel').style.display = 'none';
+  document.getElementById('lastNameLabel').style.display = 'none';
+  document.getElementById('taskLabel').style.display = 'none';
+  chooseTopicsBtn.style.display = 'none';
+  timerDiv.style.display = 'none';
+
+  topicsDiv.innerHTML = `<p>Hi <strong>${firstName}</strong></p>`;
+  topics.forEach(t => topicsDiv.innerHTML += `<p>${t.instruction}</p>`);
+
+  startRecordingBtn.style.display = 'inline';
+});
+
+// Start recording
+startRecordingBtn.addEventListener('click', async () => {
+  const firstName = firstNameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  if(!firstName || !lastName){ alert("Enter both first and last name!"); return; }
+
+  disableAllButtonsTemporarily();
+
+  audioChunks = [];
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+  mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+
+  mediaRecorder.onstop = () => {
+    const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const fileName = `${firstName}_${lastName}_${taskSelect.value}.webm`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(webmBlob);
+    a.download = fileName;
+    a.click();
+
+    topicsDiv.innerHTML = `<h3>Thank you very much for your participation!</h3>`;
+    clearInterval(countdownInterval);
+    timerDiv.style.display = 'none';
+    nextTopicBtn.style.display = 'none';
+    stopRecordingBtn.style.display = 'none';
+  };
+
+  mediaRecorder.start(1000);
+  startRecordingBtn.style.display = 'none';
+  timerDiv.style.display = 'block';
+
+  currentTopicIndex = 0;
+  topicTimeLeft = 120;
+  updateButtonsForTopic();
+  timerDiv.textContent = `${topics[currentTopicIndex].name}: ${formatTime(topicTimeLeft)}`;
+
+  countdownInterval = setInterval(() => {
+    topicTimeLeft--;
+    timerDiv.textContent = `${topics[currentTopicIndex].name}: ${formatTime(topicTimeLeft)}`;
+    if(topicTimeLeft <= 0){ moveToNextTopic(); }
+  }, 1000);
+});
+
+// Move to next section
+nextTopicBtn.addEventListener('click', moveToNextTopic);
+
+function moveToNextTopic() {
+  disableAllButtonsTemporarily();
+
+  if(currentTopicIndex < topics.length - 1){
+    currentTopicIndex++;
+    topicTimeLeft = 120;
+    updateButtonsForTopic();
+    timerDiv.textContent = `${topics[currentTopicIndex].name}: ${formatTime(topicTimeLeft)}`;
+  } else {
+    mediaRecorder.stop();
+    nextTopicBtn.style.display = 'none';
+    stopRecordingBtn.style.display = 'none';
+    clearInterval(countdownInterval);
+  }
+}
+
+// Show/hide buttons depending on section
+function updateButtonsForTopic(){
+  if(currentTopicIndex < topics.length - 1){
+    nextTopicBtn.style.display = 'inline';
+    stopRecordingBtn.style.display = 'none';
+  } else {
+    nextTopicBtn.style.display = 'none';
+    stopRecordingBtn.style.display = 'inline';
+  }
+}
+
+// Stop recording
+stopRecordingBtn.addEventListener('click', () => {
+  if(mediaRecorder && mediaRecorder.state === "recording"){
+    disableAllButtonsTemporarily();
+    mediaRecorder.stop();
+    clearInterval(countdownInterval);
+    nextTopicBtn.style.display = 'none';
+    stopRecordingBtn.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
