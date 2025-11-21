@@ -48,7 +48,17 @@
   button:disabled { background: #999; cursor: not-allowed; }
 
   #topics { margin: 20px 0; font-weight: bold; color: #555; min-height: 24px; text-align: left; line-height: 1.6; }
-  #topics strong { color: #007BFF; }
+  /* Added specific styling for the fixed topic box */
+  .topic-box {
+      background-color: #f0f8ff;
+      border-left: 5px solid #007BFF;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 10px;
+      color: #333;
+      font-size: 1.1em;
+  }
+
   #timer { margin-top: 15px; font-size: 18px; font-weight: bold; color: #007BFF; display:none; }
 </style>
 </head>
@@ -69,7 +79,7 @@
     <option value="Oral_Task_2">Oral Task 2</option>
   </select>
 
-  <button id="chooseTopicsBtn">Choose Random Topics</button>
+  <button id="chooseTopicsBtn">Show Topic</button>
   <div id="topics"></div>
 
   <button id="startRecordingBtn" disabled>Start Recording</button>
@@ -78,8 +88,7 @@
 </div>
 
 <script>
-const topicsList = ["Would you rather work on front-end or back-end development forever?", "Would you rather be paid to code or be paid to test other people’s code?", "Would you rather be the junior engineer or the senior engineer?", "Would you rather manage a team or work alone?"];
-let selectedTopics = [];
+// Variable no longer needed for random selection, but keeping variables strictly required for logic
 let mediaRecorder, audioChunks = [], countdownInterval, prepInterval, lockInterval, currentStream;
 
 const firstNameInput = document.getElementById('firstName');
@@ -119,20 +128,15 @@ function stopAndReleaseStream(){
   }
 }
 
-/* ====== CHOOSE TOPICS ====== */
+/* ====== SHOW TOPIC (Previously Random) ====== */
 chooseTopicsBtn.addEventListener('click', () => {
   const firstName = firstNameInput.value.trim();
   if(!firstName){
-    alert("Please enter your first name before choosing topics!");
+    alert("Please enter your first name before starting!");
     return;
   }
 
-  selectedTopics = [];
-  while(selectedTopics.length < 2){
-    const t = topicsList[Math.floor(Math.random()*topicsList.length)];
-    if(!selectedTopics.includes(t)) selectedTopics.push(t);
-  }
-
+  // Hide inputs
   firstNameInput.style.display = 'none';
   lastNameInput.style.display = 'none';
   taskSelect.style.display = 'none';
@@ -141,20 +145,21 @@ chooseTopicsBtn.addEventListener('click', () => {
   taskLabel.style.display = 'none';
   chooseTopicsBtn.style.display = 'none';
 
+  // Fixed Topic Injection
   topicsDiv.innerHTML = `
-    <p>Hi <strong>${firstName}</strong></p>
-    <p>You will talk about your plans for the future for three minutes considering these categories:</p>
-    <ul>
-      <li><strong>${selectedTopics[0]}</strong></li>
-      <li><strong>${selectedTopics[1]}</strong></li>
-    </ul>
-    <p id="thinkMsg"><em>Take a minute to think before recording!</em></p>
+    <p>Hi <strong>${firstName}</strong>, please address the following:</p>
+    <div class="topic-box">
+        Share two ideas about what you will do as soon as you finish your major to be successful and why both of those choices make sense for you.
+    </div>
+    <p id="thinkMsg" style="margin-top:15px;"><em>Take a minute to think before recording!</em></p>
   `;
 
   startRecordingBtn.style.display = 'block';
   startRecordingBtn.disabled = true;
   timerDiv.style.display = 'block';
-  let prepTime = 60;
+  
+  // Preparation Timer
+  let prepTime = 30;
   timerDiv.textContent = `Time to think: ${prepTime} seconds`;
   clearAllIntervals();
 
@@ -165,9 +170,9 @@ chooseTopicsBtn.addEventListener('click', () => {
     } else {
       clearInterval(prepInterval);
       const msg = document.getElementById("thinkMsg");
-      if(msg) msg.remove(); // remove "take a minute" after prep
+      if(msg) msg.remove(); // remove "take a minute" text
       startRecordingBtn.disabled = false;
-      timerDiv.style.display = 'none';
+      timerDiv.style.display = 'none'; // Hide timer until recording starts
     }
   }, 1000);
 });
@@ -190,6 +195,7 @@ startRecordingBtn.addEventListener('click', async () => {
   mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
   mediaRecorder.onstop = () => {
     const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    // Filename construction
     const fileName = `${firstName}_${lastName}_${taskSelect.value}.webm`;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -212,9 +218,11 @@ startRecordingBtn.addEventListener('click', async () => {
   stopRecordingBtn.disabled = true;
   timerDiv.style.display = 'block';
 
+  // 3 Minute Countdown
   let timeLeft = 180;
   timerDiv.textContent = `Time Remaining: ${formatTime(timeLeft)}`;
 
+  // Minimum recording time lock (30 seconds)
   let lockTime = 30;
   lockInterval = setInterval(() => {
     lockTime--;
@@ -269,7 +277,6 @@ function resetForm(){
   timerDiv.style.display = 'none';
   timerDiv.textContent = 'Time Remaining: 03:00';
   topicsDiv.innerHTML = '';
-  selectedTopics = [];
 }
 </script>
 </body>
