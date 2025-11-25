@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Audio Task Recorder</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  .container {
+    background: #ffffffcc;
+    backdrop-filter: blur(10px);
+    padding: 30px 40px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    text-align: center;
+  }
+
+  h1 { margin-bottom: 20px; font-size: 24px; color: #333; }
+
+  label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: 600; color: #444; }
+  input, select {
+    width: 90%; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;
+    transition: border 0.2s;
+  }
+  input:focus, select:focus { border-color: #007BFF; outline: none; }
+
+  button {
+    width: 100%; padding: 12px; margin-top: 15px; border-radius: 10px; border: none;
+    font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s, transform 0.2s;
+  }
+  button:hover:not(:disabled) { transform: translateY(-2px); }
+
+  #chooseTopicsBtn { background: #ff7e5f; color: #fff; }
+  #startRecordingBtn { background: #28a745; color: #fff; }
+  #stopRecordingBtn { background: #dc3545; color: #fff; }
+
+  button:disabled { background: #999; cursor: not-allowed; }
+
+  #topics { margin: 20px 0; font-weight: bold; color: #555; min-height: 24px; text-align: left; line-height: 1.6; }
+  /* Added specific styling for the fixed topic box */
+  .topic-box {
+      background-color: #f0f8ff;
+      border-left: 5px solid #007BFF;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 10px;
+      color: #333;
+      font-size: 1.1em;
+  }
+
+  #timer { margin-top: 15px; font-size: 18px; font-weight: bold; color: #007BFF; display:none; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Audio Task Recorder</h1>
+
+  <label id="firstNameLabel">First Name</label>
+  <input type="text" id="firstName" placeholder="Enter first name">
+
+  <label id="lastNameLabel">Last Name</label>
+  <input type="text" id="lastName" placeholder="Enter last name">
+
+  <label id="taskLabel">Task</label>
+  <select id="taskSelect">
+    <option value="Oral_Task_1">Oral Task 1</option>
+    <option value="Oral_Task_2">Oral Task 2</option>
+  </select>
+
+  <button id="chooseTopicsBtn">Show Topic</button>
+  <div id="topics"></div>
+
+  <button id="startRecordingBtn" disabled>Start Recording</button>
+  <button id="stopRecordingBtn" disabled>Stop Recording</button>
+  <div id="timer">Time Remaining: 03:00</div>
+</div>
+
+<script>
+// Variable no longer needed for random selection, but keeping variables strictly required for logic
+let mediaRecorder, audioChunks = [], countdownInterval, prepInterval, lockInterval, currentStream;
+
+const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const taskSelect = document.getElementById('taskSelect');
+const firstNameLabel = document.getElementById('firstNameLabel');
+const lastNameLabel = document.getElementById('lastNameLabel');
+const taskLabel = document.getElementById('taskLabel');
+const chooseTopicsBtn = document.getElementById('chooseTopicsBtn');
+const topicsDiv = document.getElementById('topics');
+const startRecordingBtn = document.getElementById('startRecordingBtn');
+const stopRecordingBtn = document.getElementById('stopRecordingBtn');
+const timerDiv = document.getElementById('timer');
+
+// hide start/stop/timer initially
+startRecordingBtn.style.display = 'none';
+stopRecordingBtn.style.display = 'none';
+timerDiv.style.display = 'none';
+
+function formatTime(seconds){
+  const m = Math.floor(seconds/60).toString().padStart(2,'0');
+  const s = (seconds%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function clearAllIntervals(){
+  if(countdownInterval) clearInterval(countdownInterval);
+  if(prepInterval) clearInterval(prepInterval);
+  if(lockInterval) clearInterval(lockInterval);
+  countdownInterval = prepInterval = lockInterval = null;
+}
+
+function stopAndReleaseStream(){
+  if(currentStream){
+    currentStream.getTracks().forEach(t => t.stop());
+    currentStream = null;
+  }
+}
+
+/* ====== SHOW TOPIC (Previously Random) ====== */
+chooseTopicsBtn.addEventListener('click', () => {
+  const firstName = firstNameInput.value.trim();
+  if(!firstName){
+    alert("Please enter your first name before starting!");
+    return;
+  }
+
+  // Hide inputs
+  firstNameInput.style.display = 'none';
+  lastNameInput.style.display = 'none';
+  taskSelect.style.display = 'none';
+  firstNameLabel.style.display = 'none';
+  lastNameLabel.style.display = 'none';
+  taskLabel.style.display = 'none';
+  chooseTopicsBtn.style.display = 'none';
+
+  // Fixed Topic Injection
+  topicsDiv.innerHTML = `
+    <p>Hi <strong>${firstName}</strong>, please speak about yourself taking into account the following:</p>
+    <div class="topic-box">
+  <ol>
+  <li>Contact Information</li>
+  <li>Professional Summary</li>
+  <li>Professional Experience</li>
+  <li>Education</li>
+  <li>Certifications & Certificates</li>
+  <li>Skills</li>
+  <li>Languages</li>
+  <li>Recommendations</li>
+  <li>Hobbies and Interests</li>
+</ol>
+
+    </div>
+    <p id="thinkMsg" style="margin-top:15px;"><em>Take a minute to think before recording!</em></p>
+  `;
+
+  startRecordingBtn.style.display = 'block';
+  startRecordingBtn.disabled = true;
+  timerDiv.style.display = 'block';
+  
+  // Preparation Timer
+  let prepTime = 60;
+  timerDiv.textContent = `Time to think: ${prepTime} seconds`;
+  clearAllIntervals();
+
+  prepInterval = setInterval(() => {
+    prepTime--;
+    if(prepTime > 0){
+      timerDiv.textContent = `Time to think: ${prepTime} seconds`;
+    } else {
+      clearInterval(prepInterval);
+      const msg = document.getElementById("thinkMsg");
+      if(msg) msg.remove(); // remove "take a minute" text
+      startRecordingBtn.disabled = false;
+      timerDiv.style.display = 'none'; // Hide timer until recording starts
+    }
+  }, 1000);
+});
+
+/* ====== START RECORDING ====== */
+startRecordingBtn.addEventListener('click', async () => {
+  const firstName = firstNameInput.value.trim() || 'Learner';
+  const lastName = lastNameInput.value.trim() || 'Participant';
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    currentStream = stream;
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+  } catch (err) {
+    alert('Unable to access microphone: ' + (err.message || err));
+    return;
+  }
+
+  audioChunks = [];
+  mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+    // Filename construction
+    const fileName = `${firstName}_${lastName}_${taskSelect.value}.webm`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    stopAndReleaseStream();
+    clearAllIntervals();
+    setTimeout(() => {
+      resetForm();
+      alert("Recording finished and downloaded!");
+    }, 500);
+  };
+
+  mediaRecorder.start(1000);
+
+  startRecordingBtn.style.display = 'none';
+  stopRecordingBtn.style.display = 'block';
+  stopRecordingBtn.disabled = true;
+  timerDiv.style.display = 'block';
+
+  // 3 Minute Countdown
+  let timeLeft = 180;
+  timerDiv.textContent = `Time Remaining: ${formatTime(timeLeft)}`;
+
+  // Minimum recording time lock (30 seconds)
+  let lockTime = 45;
+  lockInterval = setInterval(() => {
+    lockTime--;
+    if(lockTime <= 0){
+      clearInterval(lockInterval);
+      stopRecordingBtn.disabled = false;
+    }
+  }, 1000);
+
+  countdownInterval = setInterval(() => {
+    timeLeft--;
+    timerDiv.textContent = `Time Remaining: ${formatTime(timeLeft)}`;
+    if(timeLeft <= 0){
+      clearAllIntervals();
+      if(mediaRecorder.state === "recording") mediaRecorder.stop();
+    }
+  }, 1000);
+});
+
+/* ====== STOP RECORDING ====== */
+stopRecordingBtn.addEventListener('click', () => {
+  if(stopRecordingBtn.disabled) return;
+  if(mediaRecorder && mediaRecorder.state === "recording"){
+    mediaRecorder.stop();
+    stopRecordingBtn.disabled = true;
+  }
+});
+
+/* ====== RESET FORM ====== */
+function resetForm(){
+  clearAllIntervals();
+  stopAndReleaseStream();
+  mediaRecorder = null;
+  audioChunks = [];
+
+  firstNameInput.value = '';
+  lastNameInput.value = '';
+  taskSelect.value = 'Oral_Task_1';
+
+  firstNameInput.style.display = 'block';
+  lastNameInput.style.display = 'block';
+  taskSelect.style.display = 'block';
+  firstNameLabel.style.display = 'block';
+  lastNameLabel.style.display = 'block';
+  taskLabel.style.display = 'block';
+  chooseTopicsBtn.style.display = 'block';
+
+  startRecordingBtn.style.display = 'none';
+  stopRecordingBtn.style.display = 'none';
+  startRecordingBtn.disabled = true;
+  stopRecordingBtn.disabled = true;
+  timerDiv.style.display = 'none';
+  timerDiv.textContent = 'Time Remaining: 03:00';
+  topicsDiv.innerHTML = '';
+}
+</script>
+</body>
+</html>
